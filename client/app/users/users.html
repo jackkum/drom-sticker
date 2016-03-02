@@ -1,0 +1,32 @@
+<div class="container">
+  
+  <div class="panel panel-default">
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-sm-12">
+          	<input type="text" ng-model="users.search" class="form-control" placeholder="Поиск стрелка...">
+          </div>
+        </div>
+      </li>
+      <li ng-repeat="user in users.users | filter:users.searchFilter()" ng-if="!user.removed && user._id !== users.me._id" class="list-group-item">
+        <div class="row">
+          <div class="col-sm-6">
+            {{user.name}}
+          </div>
+          <div class="col-sm-6">
+            <p>{{user.car.mark}} {{user.car.model}}</p>
+            <p>{{user.car.color}}, {{user.car.number}}</p>
+          </div>
+          <div class="col-sm-12 text-right">
+            <div class="btn-group" role="group" aria-label="...">
+              <button class="btn btn-sm btn-success" ng-click="nav.addItem('shoot', users.me, user)" title="Добавить выстрел/мину в жертву"><span class="glyphicon glyphicon-screenshot"></span> Я стрелок</button>
+              <button class="btn btn-sm btn-danger" ng-click="nav.addItem('shoot', user, users.me)" title="Добавить выстрел/мину в меня"><span class="glyphicon glyphicon-screenshot"></span> Я жертва</button>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

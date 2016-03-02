@@ -1,0 +1,126 @@
+<form class="form" name="form" ng-submit="submit(form)" novalidate>
+	<div class="modal-header">
+	  <button ng-if="modal.dismissable" type="button" ng-click="$dismiss()" class="close">&times;</button>
+	  <h4 class="modal-title">Форма пользователя</h4>
+	</div>
+	<div class="modal-body">
+
+	  <div class="form-group">
+	  	<label>Имя</label>
+			<input type="text" 
+					name="name" 
+					class="form-control" 
+					ng-model="user.name" 
+					placeholder="Имя"
+					required />
+		</div>
+
+		<div class="form-group">
+	  	<label>Email</label>
+			<input type="email" 
+					name="email" 
+					class="form-control" 
+					ng-model="user.email" 
+					placeholder="Email"
+					required />
+		</div>
+
+		<div class="form-group">
+	  	<label>Пароль</label>
+			<input type="password" 
+					name="password" 
+					class="form-control" 
+					ng-model="user.password" 
+					placeholder="Пароль" />
+		</div>
+
+		<div class="form-group">
+	  	<label>Автомобиль</label>
+
+	  	<div class="row">
+	  		<div class="col-sm-3">
+	  			<input type="text" 
+						name="carMark" 
+						class="form-control" 
+						ng-model="user.car.mark" 
+						placeholder="Марка"
+						required />
+	  		</div>
+	  		<div class="col-sm-3">
+	  			<input type="text" 
+						name="carModel" 
+						class="form-control" 
+						ng-model="user.car.model" 
+						placeholder="Модель"
+						required />
+	  		</div>
+	  		<div class="col-sm-3">
+	  			<input type="text" 
+						name="carColor" 
+						class="form-control" 
+						ng-model="user.car.color" 
+						placeholder="Цвет"
+						required />
+	  		</div>
+	  		<div class="col-sm-3">
+	  			<input type="text" 
+						name="carNumber" 
+						class="form-control" 
+						ng-model="user.car.number" 
+						placeholder="Номер"
+						required />
+	  		</div>
+	  	</div>
+
+	  	<div class="form-group">
+		  	<label>Права</label>
+		  	<select ng-model="user.role" class="form-control">
+		  		<option ng-repeat="option in [{role: 'admin', name: 'Админ'},{role: 'user', name: 'Юзер'}]" value="{{option.role}}">{{option.name}}</option>
+		  	</select>
+			</div>
+
+			<div class="form-group">
+		  	<label>Drom ID</label>
+				<input type="number" 
+						name="dromId" 
+						class="form-control" 
+						ng-model="user.dromId" 
+						placeholder="Drom ID" />
+			</div>
+
+			<div class="form-group">
+		  	<label>Контакты</label>
+
+		  	<div class="row">
+		  		<div class="col-sm-4">
+		  			<input type="text" 
+							name="phone" 
+							class="form-control" 
+							ng-model="user.contacts.phone" 
+							placeholder="Телефон" />
+		  		</div>
+		  		<div class="col-sm-4">
+		  			<input type="text" 
+							name="skype" 
+							class="form-control" 
+							ng-model="user.contacts.skype" 
+							placeholder="Skype" />
+		  		</div>
+		  		<div class="col-sm-4">
+		  			<input type="text" 
+							name="icq" 
+							class="form-control" 
+							ng-model="user.contacts.icq" 
+							placeholder="ICQ" />
+		  		</div>
+		  		
+		  	</div>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-default" type="submit" ng-disabled="form.$invalid">Ok</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">Отмена</button>
+	</div>
+</form>

@@ -1,0 +1,72 @@
+<form class="form" name="form" ng-submit="submit(form)" novalidate>
+
+	<div class="modal-header">
+	  <button ng-if="modal.dismissable" type="button" ng-click="$dismiss()" class="close">&times;</button>
+	  <h4 class="modal-title">Форма {{item.type === 'shoot' ? 'выстрела' : 'мины'}}</h4>
+	</div>
+	<div class="modal-body">
+	
+		<div class="form-group">
+			<div class="row">
+        <div class="col-sm-5 text-center">
+        	<div><strong>Стрелок</strong></div>
+        	<profile user-id="item.shooter.id" class="shooter"></profile>
+        </div>
+        <div class="col-sm-2 text-center"><span class="glyphicon glyphicon-arrow-right"></span></div>
+        <div class="col-sm-5 text-center">
+        	<div><strong>Жертва</strong></div>
+        	<profile user-id="item.victim.id" class="victim"></profile>
+        </div>
+      </div>
+    </div>
+
+		<div class="form-group">
+			<div class="btn-group btn-group-justified" role="group" aria-label="...">
+				<div class="btn-group" role="group">
+					<button type="button" class="btn" ng-class="{'btn-default': item.type !== 'shoot', 'btn-success': item.type === 'shoot'}" ng-click="item.type = 'shoot'">Выстрел</button>
+				</div>
+				<div class="btn-group" role="group">
+					<button type="button" class="btn" ng-class="{'btn-default': item.type !== 'mine',  'btn-success': item.type === 'mine'}"  ng-click="item.type = 'mine'">Мина</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+	  	<label>Комментарий</label>
+			<textarea name="comment" 
+					class="form-control" 
+					ng-model="item.shooter.comment" 
+					placeholder="Комментарий"></textarea> 
+		</div>
+
+		<div class="form-group">
+			<div class="row">
+				<div class="col-sm-12">
+					<progressbar ng-show="progress.active" class="progress-striped active" value="progress.percentage" type="success"><b>{{progress.percentage}}%</b></progressbar>
+				</div>
+				<div class="col-sm-6">
+					<label>Дата/Время</label>
+					<datepicker ng-model="item.dtime" show-weeks="true" class="datepicker-sm"></datepicker>
+					<timepicker ng-model="item.dtime" hour-step="1" minute-step="15" show-meridian="false"></timepicker>
+				</div>
+				<div class="col-sm-6">
+					<file class="button" 
+							 ng-model="progress.picture" 
+							 ngf-select
+							 ngf-capture="'camera'"
+							 ngf-pattern="'image/*'"
+							 ngf-accept="'image/*'" 
+							 ngf-max-size="20MB" 
+							 ngf-min-height="100">Выбрать фото</file>
+				</div>
+				<img ngf-thumbnail="progress.picture || '/assets/images/thumb.gif'">
+				</div>
+			</div>
+			
+		</div>
+
+	<div class="modal-footer">
+		<button class="btn btn-default" type="submit" ng-disabled="form.$invalid">Ok</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">Отмена</button>
+	</div>
+</form>

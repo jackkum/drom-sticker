@@ -1,0 +1,61 @@
+<div class="container">
+  
+  <div class="panel panel-default">
+    
+    <div class="panel-body">
+
+    <div class="row">
+      <div class="col-sm-12 text-right">
+        <div class="btn-group" role="group" aria-label="...">
+          <button class="btn btn-sm btn-primary" ng-click="shoots.triggerParticipation()">{{shoots.participation ? 'Все' : 'Учавствовал'}}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="clearfix"><hr/></div>
+
+    <ul class="list-group">
+      <li ng-repeat="item in shoots.items | orderBy:'-dtime'" class="list-group-item">
+
+        <div class="row">
+
+          <div class="col-sm-12"><h3>{{item.type === 'shoot' ? 'Выстрел' : 'Мина'}}</h3></div>
+          <div class="col-sm-5">
+            <div>
+              <profile user-id="item.shooter.id" class="shooter"></profile>
+            </div>
+            <div ng-show="!!item.picture && !!item.picture.url && !!item.picture.thumb">
+              <a href="javascript:;" open-image item="item"><img ng-src="/api/items/thumb/{{item._id}}"></a>
+            </div>
+            <small>{{item.shooter.comment}}</small>
+          </div>
+          
+          <div class="col-sm-5">
+            <div><profile user-id="item.victim.id" class="victim"></profile></div>
+            <small>{{item.victim.comment}}</small>
+          </div>
+
+          <div class="col-sm-12 text-right">
+
+            <hr />
+            <div class="btn-group" role="group" aria-label="...">
+              <button ng-if="shoots.isAdmin()" title="Удалить выстрел" delete-item item="item" class="btn btn-sm btn-danger"><i class="glyphicon glyphicon glyphicon-trash"></i> Удалить</button>
+              <button ng-if="!item.victim.cancel && !item.victim.confirm && (shoots.isAdmin() || item.victim.id === shoots.me._id)" title="Отменить выстрел" cancel-item item="item" class="btn btn-sm btn-danger"><i class="glyphicon glyphicon-remove"></i> Отменить</button>
+              <button ng-if="!item.victim.cancel && !item.victim.confirm && (shoots.isAdmin() || item.victim.id === shoots.me._id)" title="Подтвердить выстрел" confirm-item item="item" class="btn btn-sm btn-success"><i class="glyphicon glyphicon-ok"></i> Подтвердить</button>
+            </div>
+
+            <span class="glyphicon" 
+              ng-class="{'glyphicon-ok':item.victim.confirm, 'glyphicon-remove': item.victim.cancel, 'glyphicon-time': !item.victim.confirm && !item.victim.cancel}"
+              title="{{item.victim.confirm ? 'Выстрел подтвержден': item.victim.cancel ? 'Выстрел отменен' : 'Ожидает подтверждения от жертвы'}}"></span>
+            <span>{{item.dtime | date:"d MMMM HH:mm"}}</span>
+          </div>
+        </div>
+      </li>
+
+      <li class="list-group-item text-center" ng-show="shoots.loadMore" ng-click="shoots.load()">
+        <a href class="btn btn-success">Загрузить еще</a>
+      </li>
+    </ul>
+    </div>
+  </div>
+</div>

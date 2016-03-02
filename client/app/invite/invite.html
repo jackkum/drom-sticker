@@ -1,0 +1,96 @@
+<form class="form" name="form" ng-submit="invite.submit(form)" novalidate>
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="form-group">
+		  	<label>Email</label>
+				<input type="email" 
+						name="email" 
+						class="form-control" 
+						ng-model="invite.user.email" 
+						placeholder="Email"
+						required />
+			</div>
+
+			<div class="form-group">
+		  	<label>Пароль</label>
+				<input type="password" 
+						name="password" 
+						class="form-control" 
+						ng-model="invite.user.password" 
+						placeholder="Пароль" />
+			</div>
+
+			<div class="form-group">
+		  	<label>Автомобиль</label>
+
+		  	<div class="row">
+		  		<div class="col-sm-3">
+		  			<input type="text" 
+							name="carMark" 
+							class="form-control" 
+							ng-model="invite.user.car.mark" 
+							placeholder="Марка"
+							required />
+		  		</div>
+		  		<div class="col-sm-3">
+		  			<input type="text" 
+							name="carModel" 
+							class="form-control" 
+							ng-model="invite.user.car.model" 
+							placeholder="Модель"
+							required />
+		  		</div>
+		  		<div class="col-sm-3">
+		  			<input type="text" 
+							name="carColor" 
+							class="form-control" 
+							ng-model="invite.user.car.color" 
+							placeholder="Цвет"
+							required />
+		  		</div>
+		  		<div class="col-sm-3">
+		  			<input type="text" 
+							name="carNumber" 
+							class="form-control" 
+							ng-model="invite.user.car.number" 
+							placeholder="Номер"
+							required />
+		  		</div>
+		  	</div>
+
+		  	<div class="form-group">
+			  	<label>Контакты</label>
+
+			  	<div class="row">
+			  		<div class="col-sm-4">
+			  			<input type="text" 
+								name="phone" 
+								class="form-control" 
+								ng-model="invite.user.contacts.phone" 
+								placeholder="Телефон" />
+			  		</div>
+			  		<div class="col-sm-4">
+			  			<input type="text" 
+								name="skype" 
+								class="form-control" 
+								ng-model="invite.user.contacts.skype" 
+								placeholder="Skype" />
+			  		</div>
+			  		<div class="col-sm-4">
+			  			<input type="text" 
+								name="icq" 
+								class="form-control" 
+								ng-model="invite.user.contacts.icq" 
+								placeholder="ICQ" />
+			  		</div>
+			  		
+			  	</div>
+			  </div>
+
+			  <div>
+			  	<button class="btn btn-default" type="submit" ng-disabled="form.$invalid">Сохранить</button>
+			  </div>
+		</div>
+	</div>
+</form>

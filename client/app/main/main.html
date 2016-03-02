@@ -1,0 +1,63 @@
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="page-header">Привет {{main.me.name}}</h1>
+
+      <table class="table">
+      	<tbody>
+      		<tr>
+      			<td>Email</td>
+      			<td>{{main.me.email}}</td>
+      		</tr>
+      		<tr>
+      			<td>Авто</td>
+      			<td>{{main.me.car.model}} {{main.me.car.mark}}</td>
+      		</tr>
+      		<tr>
+      			<td>Цвет</td>
+      			<td>{{main.me.car.color}}</td>
+      		</tr>
+      		<tr>
+      			<td>Номер</td>
+      			<td>{{main.me.car.number}}</td>
+      		</tr>
+      	</tbody>
+      </table>
+      
+      <form class="form" name="form" ng-submit="main.changePassword(form)" novalidate>
+      	<div class="form-group">
+	  			<label>Сменить пароль</label>
+
+	  			<div class="input-group">
+						<input type="password" class="form-control" ng-model="main.me.password" placeholder="Пароль" required>
+						<span class="input-group-btn">
+							<button class="btn btn-primary" type="submit" ng-disabled="form.$invalid">Сохранить</button>
+						</span>
+					</div>
+				</div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row">
+  	<div class="col-sm-12">
+  		<h3>Неподтвержденные выстрелы/мины</h3>
+      <ul class="list-group">
+      	<li ng-show="main.items.length === 0" class="list-group-item text-center">Нет</li>
+      	<li ng-repeat="item in main.items" class="list-group-item">
+      		<div>
+            <profile user-id="item.shooter.id" class="shooter"></profile>
+          </div>
+          <small>{{item.shooter.comment}}</small>
+
+          <div class="text-right">
+          	<hr/>
+          	<button title="Отменить выстрел" cancel-item item="item" class="btn btn-sm btn-danger"><i class="glyphicon glyphicon-remove"></i></button>
+            <button title="Подтвердить выстрел" confirm-item item="item" class="btn btn-sm btn-success"><i class="glyphicon glyphicon-ok"></i></button>
+          </div>
+      	</li>
+      </ul>
+  	</div>
+  	
+  </div>
+</div>

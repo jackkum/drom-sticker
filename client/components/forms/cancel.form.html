@@ -1,0 +1,18 @@
+<form class="form" name="form" ng-submit="submit(form)" novalidate>
+	<div class="modal-header">
+	  <button ng-if="modal.dismissable" type="button" ng-click="$dismiss()" class="close">&times;</button>
+	  <h4 class="modal-title">Отмена выстрела/мины</h4>
+	</div>
+	<div class="modal-body">
+
+	  <div class="form-group">
+	  	<label>Комментарий</label>
+	  	<textarea name="comment" ng-model="item.victim.comment" class="form-control"></textarea>
+		</div>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-default" type="submit" ng-disabled="form.$invalid">Ok</button>
+		<button class="btn btn-default" type="button" ng-click="$dismiss()">Отмена</button>
+	</div>
+</form>

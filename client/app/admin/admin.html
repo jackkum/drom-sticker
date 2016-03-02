@@ -1,0 +1,36 @@
+<div class="container">
+  
+  <div class="panel panel-default">
+
+    <ul class="list-group">
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-sm-8">
+          Стрелки
+          </div>
+          <div class="col-sm-4 text-right">
+            <a class="btn btn-primary" ng-click="admin.getForm()" href><span class="glyphicon glyphicon-user"></span> Новый</a>
+            <a class="btn btn-primary" ng-click="admin.addInvite()" href><span class="glyphicon glyphicon-link"></span> Пригласить</a>
+          </div>
+        </div>
+      </li>
+      <li ng-repeat="user in admin.users" ng-if="!user.removed" class="list-group-item">
+        <div class="row">
+          <div class="col-sm-5">
+            {{user.name}}
+          </div>
+          <div class="col-sm-5">
+            <p>{{user.car.mark}} {{user.car.model}}</p>
+            <p>{{user.car.color}}, {{user.car.number}}</p>
+          </div>
+          <div class="col-sm-2 text-right">
+            <div class="btn-group" role="group" aria-label="...">
+              <a class="btn btn-primary" ng-click="admin.getForm(user, $index)" href><span class="glyphicon glyphicon-edit"></span></a>
+              <a class="btn btn-primary" ng-click="admin.delete(user)" href><span class="glyphicon glyphicon-trash"></span></a>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

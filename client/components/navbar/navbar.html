@@ -1,0 +1,35 @@
+<div class="navbar navbar-default navbar-static-top" ng-controller="NavbarController">
+  <div class="container">
+    <div class="navbar-header">
+      <button class="navbar-toggle" type="button" ng-click="nav.isCollapsed = !nav.isCollapsed">
+        <span class="sr-only">Навигация</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="/" class="navbar-brand">Выстрел в стикер</a>
+    </div>
+    <div collapse="nav.isCollapsed" class="navbar-collapse collapse" id="navbar-main">
+      <ul class="nav navbar-nav">
+        <li ng-show="nav.isAdmin()" ng-class="{active: nav.isActive('/admin')}"><a href="/admin">Управление</a></li>
+        <li ng-show="nav.isLoggedIn()" ng-class="{active: nav.isActive('/users')}"><a href="/users">Стрелки</a></li>
+        <li ng-show="nav.isLoggedIn()" ng-class="{active: nav.isActive('/shoots')}"><a href="/shoots">Лента</a></li>
+        <li ng-show="nav.isLoggedIn()" ng-class="{active: nav.isActive('/results')}"><a href="/results">Результаты</a></li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <!--
+        <li ng-show="nav.isLoggedIn()" class="dropdown" dropdown>
+          <a href="javascript:;" class="dropdown-toggle" dropdown-toggle>Добавить<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href ng-click="nav.addItem('shoot')">Выстрел</a></li>
+            <li><a href ng-click="nav.addItem('mine')">Мина</a></li>
+          </ul>
+        </li>
+        -->
+        <li ng-hide="nav.isLoggedIn()" ng-class="{active: nav.isActive('/login')}"><a href="/login">Вход</a></li>
+        <li ng-show="nav.isLoggedIn()"><a href="/logout">Выход</a></li>
+      </ul>
+    </div>
+  </div>
+</div>

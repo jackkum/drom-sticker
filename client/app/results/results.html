@@ -1,0 +1,91 @@
+<div class="container">
+  
+  <div class="panel panel-default">
+    
+    
+    <div class="panel-body">
+      <div class="btn-group pull-right" role="group" aria-label="...">
+        <button type="button" class="btn btn-primary" ng-click="results.reload()">
+          <span class="glyphicon glyphicon-refresh"></span> 
+        </button>
+        <button type="button" class="btn btn-primary" ng-click="results.isCollapsed = !results.isCollapsed">
+          <span class="glyphicon glyphicon-filter"></span>
+        </button>
+      </div>
+
+      <div class="row" collapse="results.isCollapsed">
+        <div class="col-sm-5">
+          <datepicker ng-model="results.filter.sd" show-weeks="true" class="datepicker-sm"></datepicker>
+        </div>
+        <div class="col-sm-5">
+          <datepicker ng-model="results.filter.ed" show-weeks="true" class="datepicker-sm"></datepicker>
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="panel-body">
+
+      <div class="row">
+        <div class="col-sm-6">
+          <h4>Стрелок</h4>
+          <table class="table">
+          <thead>
+            <tr class="text-center">
+              <th>#</th>
+              <th>Ник</th>
+              <th title="Выстрелов">
+                <a href="javascript:;" ng-click="results.sortCol.shooter = '-shoots.hits'"><i class="glyphicon glyphicon-screenshot"></i></a>
+              </th>
+              <th title="Мин">
+                <a href="javascript:;" ng-click="results.sortCol.shooter = '-mines.hits'"><i class="glyphicon glyphicon-flag"></i></a>
+              </th>
+              <th title="Итого">
+                <a href="javascript:;" ng-click="results.sortCol.shooter = '-score.shooter'"><i class="glyphicon glyphicon-list-alt"></i></a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="user in results.users | orderBy:results.sortCol.shooter" ng-show="user.score.shooter > 0">
+              <td>{{$index+1}}</td>
+              <td>{{user.name}}</td>
+              <td>{{user.shoots.hits}}</td>
+              <td>{{user.mines.hits}}</td>
+              <td>{{user.score.shooter}}</td>
+            </tr>
+          </tbody>
+          </table>
+        </div>
+
+        <div class="col-sm-6">
+          <h4>Жертва</h4>
+          <table class="table">
+          <thead>
+            <tr class="text-center">
+              <th>#</th>
+              <th>Ник</th>
+              <th title="Выстрелов">
+                <a href="javascript:;" ng-click="results.sortCol.victim = '-shoots.wounds'"><i class="glyphicon glyphicon-screenshot"></i></a>
+              </th>
+              <th title="Мин">
+                <a href="javascript:;" ng-click="results.sortCol.victim = '-mines.wounds'"><i class="glyphicon glyphicon-flag"></i></a>
+              </th>
+              <th title="Итого">
+                <a href="javascript:;" ng-click="results.sortCol.victim = '-score.victim'"><i class="glyphicon glyphicon-list-alt"></i></a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="user in results.users | orderBy:results.sortCol.victim" ng-show="user.score.victim > 0">
+              <td>{{$index+1}}</td>
+              <td>{{user.name}}</td>
+              <td>{{user.shoots.wounds}}</td>
+              <td>{{user.mines.wounds}}</td>
+              <td>{{user.score.victim}}</td>
+            </tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+  </div>
+</div>
