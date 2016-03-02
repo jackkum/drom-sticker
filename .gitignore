@@ -7,3 +7,6 @@ dist
 /server/config/*
 npm-debug.log
 coverage
+
+
+!/server/config/test.js
