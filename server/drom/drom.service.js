@@ -6,23 +6,31 @@ import _ from 'lodash';
 import request from 'request';
 import crypto from 'crypto';
 
-var FileCookieStore = require('tough-cookie-filestore');
-var j = request.jar(new FileCookieStore('../config/cookies.json'));
+var req = request.defaults({jar: true});
 
-var req = request.defaults({jar: j});
-
-export function getThemeParams(theme) {
+export function getTheme(theme, page) {
 	return new Promise((resolve, reject) => {
-		
 		req.get({
-				url: 'http://forums.drom.ru/irkutsk/t' + theme + '.html',
-				headers: {'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'}
+				url: 'http://forums.drom.ru/irkutsk/t' + theme + (page && page > 1 ? '-p' + page : '') + '.html',
+				headers: {
+					'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
+				}
 			}, function(err, responce, body){
 				
 				if(err){
 					return reject(err);
 				}
 
+				resolve(responce);
+			});
+	});
+}
+
+export function getThemeParams(theme) {
+
+	return getTheme(theme)
+		.then(responce => {
+			return new Promise((resolve, reject) => {
 				var post = {
 					securitytoken: "",
 					ajax: "1",
@@ -45,7 +53,7 @@ export function getThemeParams(theme) {
 
 				['loggedinuser', 'securitytoken'].forEach(function(name){
 					var reg   = new RegExp('<input type="hidden" name="' + name + '" value="([^"]*)" />');
-					var match = body.match(reg);
+					var match = responce.body.match(reg);
 
 					if( ! match){
 						throw new Error('Find ' + name + ' not found');
@@ -56,16 +64,66 @@ export function getThemeParams(theme) {
 
 				['posthash', 'poststarttime'].forEach(function(name){
 					var reg   = new RegExp('"' + name + '":"([^"]*)"');
-					var match = body.match(reg);
+					var match = responce.body.match(reg);
 
 					if( ! match){
 
 						var reg   = new RegExp('"' + name + '":([^,]*)');
-						var match = body.match(reg);
+						var match = responce.body.match(reg);
 
 						if( ! match){
 							throw new Error('Find ' + name + ' not found');
 						}
+					}
+
+					post[name] = match[1];
+				});
+
+				resolve(post);
+			});
+		});
+}
+
+export function getUploadParams(theme, token) {
+
+	return new Promise((resolve, reject) => {
+		
+		req.post({
+				url: 'http://forums.drom.ru/ajax.php',
+				form: {
+					ajax:"1",
+					do:"fetchhtml",
+					template:"editor_upload_overlay",
+					securitytoken: token
+				},
+				headers: {
+					referer: 'http://forums.drom.ru/irkutsk/t' + theme + '.html',
+					'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
+				}
+			}, function(err, responce, body){
+				
+				if(err){
+					return reject(err);
+				}
+
+				var post = {
+					do: "",
+					flash: "",
+					upload: "",
+					s: "",
+					securitytoken: "",
+					poststarttime: "",
+					posthash: "",
+					contenttypeid: "",
+					MAX_FILE_SIZE: ""
+				};
+
+				['do', 'flash', 'upload', 's', 'securitytoken', 'poststarttime', 'posthash', 'contenttypeid', 'MAX_FILE_SIZE'].forEach(function(name){
+					var reg   = new RegExp('<input type="hidden" name="' + name + '" value="([^"]*)" />');
+					var match = body.match(reg);
+
+					if( ! match){
+						throw new Error('Find ' + name + ' not found');
 					}
 
 					post[name] = match[1];
@@ -78,91 +136,71 @@ export function getThemeParams(theme) {
 }
 
 export function postAttachment(theme, attachment) {
-	console.log("Check auth...");
-	return isLoggedIn()
-		.then(loggedIn => {
-			if(loggedIn){
-				return;
-			}
-
-			console.log("authenticate...");
-			return authenticate();
-		})
+	var themeParams = {};
+	return login()
 		.then(() => {
-			console.log("get theme params...");
-			return getThemeParams(theme)
-				.then(post => {
-					console.log("Insert attachment...");
-					return insertAttachment(theme, attachment, post);
-				})
+			return getThemeParams(theme);
+		})
+		.then(params => {
+			themeParams = params;
+			return getUploadParams(theme, params.securitytoken);
+		})
+		.then(post => {
+			return insertAttachment(theme, attachment, post);
+		})
+		.then(attachmentId => {
+			return new Promise(function(resolve){
+				resolve({attachmentId: attachmentId, params: themeParams});
+			});
 		});
 }
 
-export function postMessage(message, theme) {
-	return isLoggedIn()
-		.then(loggedIn => {
-			if(loggedIn){
-				return;
+export function postMessage(message, theme, params) {
+	return login()
+		.then(() => {
+			if( ! params){
+				return getThemeParams(theme);
 			}
 
-			return authenticate();
+			return params;
 		})
-		.then(() => {
-			return getThemeParams(theme)
-				.then(post => {
+		.then(params => {
+				params.message_backup = message;
+				params.message        = message;
 
-					post.message_backup = message;
-					post.message        = message;
-
-					return insertPost(theme, post);
-				})
-		});
+				return insertPost(theme, params);
+			});
 }
 
 export function insertAttachment(theme, attachment, post) {
 	return new Promise(function(resolve, reject){
 
-		delete post.ajax_lastpost;
-		delete post.message_backup;
-		delete post.message;
-		delete post.wysiwyg;
-		delete post.signature;
-		delete post.fromquickreply;
-		delete post.t;
-		delete post.p;
-		delete post.specifiedpost;
-		delete post.parseurl;
-		delete post.loggedinuser;
-
-		post.do                = 'manageattach';
-		post.flash             = 0;
-		post.upload            = 1;
-		post.s                 = '';
-		post.contenttypeid     = 1;
-		post.MAX_FILE_SIZE     = '';
-		post['values[t]']      = theme;
-		post['values[theend]'] = 'fin';
-		post.ajax              = 1;
-		post['attachment[]']   = attachment;
-
-		console.log(post);
-		console.log(j.getCookies('http://forums.drom.ru'));
+		post.ajax               = 1;
+		post.flash              = 1;
+		post.upload             = 1;
+		post.contenttypeid      = 1;
+		post['values[t]']       = theme;
+		post['values[theend]']  = 'fin';
+		post['attachmenturl[]'] = attachment;
 
 		req.post({
 			url: 'http://forums.drom.ru/newattachment.php',
 			formData: post,
 			headers: {
-				referer: 'http://forums.drom.ru/irkutsk/t' + theme + '.html'
+				referer: 'http://forums.drom.ru/irkutsk/t' + theme + '.html',
+				'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
 			}
 		}, function (err, resp, body) {
 	    if (err) {
 	      return reject(err);
 	    }
 
-	    console.log(body);
+	    if(body.indexOf("error: ") !== -1){
+	    	var error = body.split(":")[1];
+	    	return reject(new Error(error || "Ошибка добавления картинки"));
+	    }
 
-	    var reg   = new RegExp('<attachmentid>([0-9]*)</attachmentid>');
-			var match = body.match(reg);
+	    var match = body.match(/ok - ([0-9]*) - ([0-9]*)/);
 
 			if( ! match){
 				return reject(new Error('Attachment id not found'));
@@ -180,7 +218,8 @@ export function insertPost(theme, post) {
 			url: 'http://forums.drom.ru/newreply.php?do=postreply&t=' + theme,
 			headers: {
 				'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0',
-				'referer': 'http://forums.drom.ru/irkutsk/t' + theme + '.html'
+				'referer': 'http://forums.drom.ru/irkutsk/t' + theme + '.html',
+				'X-Requested-With':"XMLHttpRequest"
 			},
 			form: post
 		}, function(err, responce, body){
@@ -188,7 +227,6 @@ export function insertPost(theme, post) {
 				return reject(err);
 			}
 
-			console.log("Message sent");
 			return resolve();
 		});
 	});
@@ -196,35 +234,21 @@ export function insertPost(theme, post) {
 
 export function sendMessage(userId, title, message) {  
 
-	console.log("Search user...");
 	return User.findByIdAsync(userId)
 		.then(user => {
 			if( ! user){
 				throw new Error('User not found');
 			}
 
-			console.log("User finded! Test is logged in");
-			return isLoggedIn()
-				.then(loggedIn => {
-					if(loggedIn){
-						console.log("Bot is logged in, continue");
-						return user;
-					}
-
-					console.log("Authenticate a bot...");
-					return authenticate()
-						.then(() => {
-							return user;
-						});
-				});
+			return login();
 		})
 		.then(user => {
 			return new Promise((resolve, reject) => {
-				console.log("Start send message...");
-				console.log('http://forums.drom.ru/private.php?do=newpm&u=' + user.dromId);
 				req.get({
 					url: 'http://forums.drom.ru/private.php?do=newpm&u=' + user.dromId,
-					headers: {'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'}
+					headers: {
+						'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
+					}
 				}, function(err, responce, body){
 					if(err){
 						return reject(err);
@@ -240,7 +264,9 @@ export function sendMessage(userId, title, message) {
 
 					req.post({
 						url: 'http://forums.drom.ru/private.php?do=insertpm&pmid=',
-						headers: {'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'},
+						headers: {
+							'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
+						},
 						form: {
 							recipients: user.name,
 							bccrecipients:"",
@@ -273,7 +299,9 @@ export function isLoggedIn() {
 	return new Promise((resolve, reject) => {
 		req.get({
 			url: 'http://forums.drom.ru/usercp.php',
-			headers: {'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'}
+			headers: {
+				'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
+			}
 		}, function(err, responce, body){
 			if(err){
 				return reject(err);
@@ -294,7 +322,9 @@ export function authenticate() {
 										.digest('hex');
 		req.post({
 			url: 'http://forums.drom.ru/login.php?do=login',
-			headers: {'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'},
+			headers: {
+				'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
+			},
 			form: {
 				vb_login_username: config.drom.login,
 				vb_login_password: "",
@@ -314,4 +344,15 @@ export function authenticate() {
 			return resolve();
 		});
 	});
+}
+
+export function login() {
+	return isLoggedIn()
+		.then(loggedIn => {
+			if(loggedIn){
+				return;
+			}
+
+			return authenticate();
+		});
 }

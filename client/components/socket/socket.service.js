@@ -2,7 +2,7 @@
 'use strict';
 
 angular.module('stikerApp')
-  .factory('socket', function(socketFactory) {
+  .factory('socket', function(socketFactory, Auth) {
     var url = 'ws://'  + location.hostname + (location.port ? ':' + location.port : '') + '/';
     if(location.protocol==='https:'){
       url = 'wss://'  + location.hostname + (location.port ? ':' + location.port : '') + '/';
@@ -10,7 +10,7 @@ angular.module('stikerApp')
     // socket.io now auto-configures its connection when we ommit a connection url
     var ioSocket = io(url, {
       // Send auth token on connection, you will need to DI the Auth service above
-      // 'query': 'token=' + Auth.getToken()
+      query: 'token=' + Auth.getToken(),
       path: '/socket.io-client'
     });
 

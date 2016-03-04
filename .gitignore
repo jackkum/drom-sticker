@@ -4,9 +4,9 @@ public
 .idea
 client/bower_components
 dist
-/server/config/*
 npm-debug.log
 coverage
 
-
-!/server/config/test.js
+/server/config/environment/index.js
+/server/config/environment/production.js
+/server/config/local.env.js
