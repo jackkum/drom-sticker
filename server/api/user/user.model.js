@@ -3,6 +3,7 @@
 import crypto from 'crypto';
 var mongoose = require('bluebird').promisifyAll(require('mongoose'));
 import {Schema} from 'mongoose';
+import * as drom from '../../drom/drom.service';
 
 var UserSchema = new Schema({
   name: String,
@@ -29,7 +30,7 @@ var UserSchema = new Schema({
     coords: {lat: Number, lon: Number}
   }],
   avatart: String,
-  dromId: Number,
+  dromId: {type: Number, },
   contacts: {
     phone: String,
     skype: String,
@@ -39,17 +40,7 @@ var UserSchema = new Schema({
   removed: Boolean
 });
 
-UserSchema.pre('save', function(next){
-  if(this.provider === 'invite' && ! this.hash){
-    this.hash = encryptPassword(password);
-  }
-
-  if(this.provider === 'invite' && ! this.password){
-    this.password = '' + Math.random();
-  }
-
-  next();
-});
+UserSchema.index({dromId: 1, email: 1}, {unique: true});
 
 /**
  * Virtuals
@@ -129,6 +120,25 @@ var validatePresenceOf = function(value) {
  */
 UserSchema
   .pre('save', function(next) {
+
+    if(this.provider === 'invite' && ! this.hash){
+      this.hash = this.encryptPassword('' + Math.random());
+    }
+
+    if(this.provider === 'invite' && ! this.password){
+      this.password = '' + Math.random();
+    }
+
+    if(this.provider === 'invite' && this.isNew && this.dromId){
+      drom.sendMessage(this.dromId, "Приглашение в игру \"Выстрел в стикер\"", "[URL=\"https://drom-sticker.herokuapp.com/invite?hash=" + this.hash + "\"]Вступить в ряды[/URL]")
+      .then(() => {
+        console.log("Done");
+      })
+      .catch(err => {
+        console.error(err);
+      });
+    }
+
     // Handle new/update passwords
     if (!this.isModified('password')) {
       return next();
