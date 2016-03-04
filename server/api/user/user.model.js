@@ -30,7 +30,7 @@ var UserSchema = new Schema({
     coords: {lat: Number, lon: Number}
   }],
   avatart: String,
-  dromId: {type: Number, },
+  dromId: {type: Number, unique: true},
   contacts: {
     phone: String,
     skype: String,
@@ -39,8 +39,6 @@ var UserSchema = new Schema({
 
   removed: Boolean
 });
-
-UserSchema.index({dromId: 1, email: 1}, {unique: true});
 
 /**
  * Virtuals
