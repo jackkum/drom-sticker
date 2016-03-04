@@ -4,6 +4,9 @@ var mongoose    = require('bluebird').promisifyAll(require('mongoose'));
 var User        = require('../user/user.model');
 var config      = require('../../config/environment');
 var moment      = require('moment');
+var request     = require('request');
+var _           = require('lodash');
+var fs          = require('fs');
 var nodemailer  = require('nodemailer');
 var transporter = nodemailer.createTransport();
 var drom        = require('../../drom/drom.service');
@@ -83,19 +86,21 @@ ItemSchema.pre('save', function(next) {
 
       var message = "[B]" + (self.type === 'shoot' ? 'Выстрел' : 'Мина') + "[/B]\n" 
               + victimName + " был подбит " + shooterName + ", " + moment(self.dtime).add(8, 'hours').format("ddd, DD MMMM YYYY HH:mm") + "\n"
-              + self.shooter.comment + "\n\n";
-      
+              + (self.shooter.comment || '') + "\n\n";
+
       if(self._id && self.picture && self.picture.url){
-        message += "[IMG]https://drom-sticker.herokuapp.com/api/items/image/" + self._id + "[/IMG]"
+        message += '[URL="http://' + self.picture.url + '"][IMG]http://' + self.picture.thumb + '[/IMG][/URL]';
       }
 
-      drom.postMessage(message, config.drom.theme)
-      .then(() => {
-        console.log("Done");
-      })
-      .catch(err => {
-        console.error(err);
-      });
+      console.log("Start sync with drom.ru");
+      drom
+        .postMessage(message, config.drom.theme)
+        .then(() => {
+          console.log("Done");
+        })
+        .catch(err => {
+          console.error(err);
+        });
     })
     .catch(console.error);
 });
