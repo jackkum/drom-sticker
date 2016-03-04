@@ -29,3 +29,6 @@ Run `grunt build` for building and `grunt serve` for preview.
 ## Testing
 
 Running `npm test` will run the unit tests with karma.
+
+## After clone
+Don't forget rename *.sample.js files in server/config/environment directory and write self params
