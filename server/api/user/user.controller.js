@@ -24,12 +24,12 @@ function saveUpdates(user, updates) {
   return function(entity) {
 
     // only admin can change the role
-    if( ! auth.hasRole('admin', true)){
+    if( ! auth.hasRole('admin', user.role)){
       updates.role = entity.role;
     }
 
     if(updates.provider === 'invite'){
-      updates.provider === 'local';
+      updates.provider = 'local';
     }
 
     var updated = _.merge(entity, updates);
@@ -82,8 +82,13 @@ function handleError(res, statusCode) {
  * restriction: 'admin'
  */
 export function index(req, res) {
-  User.findAsync({}, '-salt -password -invite')
+  User.findAsync({}, '-salt -password')
     .then(users => {
+      if( ! auth.hasRole('admin', req.user.role)){
+        users.forEach(function(user, index){
+          users[index].invite = undefined;
+        });
+      }
       res.status(200).json(users);
     })
     .catch(handleError(res));
@@ -119,6 +124,10 @@ export function show(req, res, next) {
     .then(user => {
       if (!user) {
         return res.status(404).end();
+      }
+
+      if( ! auth.hasRole('admin', req.user.role)){
+        user.invite = undefined;
       }
       res.json(user);
     })
@@ -252,6 +261,15 @@ export function me(req, res, next) {
       res.json(user);
     })
     .catch(err => next(err));
+}
+
+export function avatar(req, res) {
+  var dromId = req.params.id;
+
+  drom.getRequest()
+    .then(request => {
+      request.get('http://forums.drom.ru/customavatars/avatar' + dromId + '_1.gif').pipe(res);
+    });
 }
 
 /**

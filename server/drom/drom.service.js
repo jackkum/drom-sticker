@@ -357,3 +357,10 @@ export function login() {
 			return authenticate();
 		});
 }
+
+export function getRequest() {
+	return login()
+		.then(() => {
+			return req;
+		});
+}

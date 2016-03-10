@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('stikerApp')
-	.factory('UserService', function(User){
+	.factory('UserService', function(User, socket){
 		var users = undefined,
 			query = function() {
 				if( ! users){
@@ -9,7 +9,10 @@ angular.module('stikerApp')
 
 					users.$promise.catch(err => {
 						users = undefined;
+						socket.unsyncUpdates('user');
 					});
+
+					socket.syncUpdates('user', users);
 				}
 				
 				return users;
@@ -17,6 +20,7 @@ angular.module('stikerApp')
 
 			reload = function() {
 				users = undefined;
+				socket.unsyncUpdates('user');
 				return query();
 			};
 

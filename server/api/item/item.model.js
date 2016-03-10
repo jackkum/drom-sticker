@@ -16,6 +16,7 @@ moment.locale('RU');
 var ItemSchema = new mongoose.Schema({
   dtime: Date,
   type: {type: String, default: 'shoot'},
+  provider: {type: String, default: 'local'},
   picture: {
     url: String,
     thumb: String
@@ -34,7 +35,16 @@ var ItemSchema = new mongoose.Schema({
 
 ItemSchema.pre('save', function(next) {
   
+  if( ! this.provider){
+    this.provider = 'local';
+  }
+
   if( ! this.isNew){
+    return next();
+  }
+
+  // this is not local shoot
+  if(this.provider !== 'local'){
     return next();
   }
 
@@ -73,8 +83,12 @@ ItemSchema.pre('save', function(next) {
         
       });
 
-      var shooterName = '[COLOR="#00FF00"]' + shooter.name + '[/COLOR]',
-          victimName  = '[COLOR="#FF0000"]' + victim.name + '[/COLOR]';
+      var shooterName    = '[COLOR="#00FF00"]' + shooter.name + '[/COLOR]',
+          shooterCar     = shooter.car || {mark: 'Не указан', model: 'Не указан', color: 'Не указан', number: 'Не указан'},
+          shooterCarName = shooterCar.mark + ' ' + shooterCar.model,
+          victimName     = '[COLOR="#FF0000"]' + victim.name + '[/COLOR]',
+          victimCar     = victim.car || {mark: 'Не указан', model: 'Не указан', color: 'Не указан', number: 'Не указан'},
+          victimCarName = victimCar.mark + ' ' + victimCar.model;
 
       if(shooter.dromId){
         shooterName = '[url=http://forums.drom.ru/member.php?u=' + shooter.dromId + ']' + shooterName + '[/url]';
@@ -85,7 +99,7 @@ ItemSchema.pre('save', function(next) {
       }
 
       var message = "[B]" + (self.type === 'shoot' ? 'Выстрел' : 'Мина') + "[/B]\n" 
-              + victimName + " был подбит " + shooterName + ", " + moment(self.dtime).add(8, 'hours').format("ddd, DD MMMM YYYY HH:mm") + "\n"
+              + victimName + " подбит машиной " + shooterCarName + " (" + shooterName + ")" + ", " + moment(self.dtime).add(8, 'hours').format("ddd, DD MMMM YYYY HH:mm") + "\n"
               + (self.shooter.comment || '') + "\n\n";
 
       if(self._id && self.picture && self.picture.url){

@@ -5,6 +5,8 @@ angular.module('stikerApp', [
   'stikerApp.admin',
   'stikerApp.constants',
   'stikerApp.resource',
+  'angular-loading-bar',
+  'ngAnimate',
   'ngCookies',
   'ngResource',
   'ngSanitize',

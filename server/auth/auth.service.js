@@ -50,13 +50,13 @@ export function isAuthenticated() {
 /**
  * Checks if the user role meets the minimum requirements of the route
  */
-export function hasRole(roleRequired, noCompose) {
+export function hasRole(roleRequired, userRole) {
   if (!roleRequired) {
     throw new Error('Required role needs to be set');
   }
 
-  if(noCompose){
-    return config.userRoles.indexOf(req.user.role) >= config.userRoles.indexOf(roleRequired);
+  if(userRole){
+    return config.userRoles.indexOf(userRole) >= config.userRoles.indexOf(roleRequired);
   }
 
   return compose()
