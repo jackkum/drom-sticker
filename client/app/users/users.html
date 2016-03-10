@@ -10,7 +10,7 @@
           </div>
         </div>
       </li>
-      <li ng-repeat="user in users.users | filter:users.searchFilter()" ng-if="!user.removed && user._id !== users.me._id" class="list-group-item">
+      <li ng-repeat="user in users.users | filter:users.searchFilter()" ng-if="user.provider === 'local' && !user.removed && user._id !== users.me._id" class="list-group-item">
         <div class="row">
           <div class="col-sm-6">
             {{user.name}}

@@ -6,6 +6,7 @@ class MainController {
 
   constructor(Auth, User, Item, socket, $scope) {
     this.me = Auth.getCurrentUser();
+    this.alerts = [];
 
     if(this.me && this.me.$promise){
     	var self = this;
@@ -34,7 +35,19 @@ class MainController {
   }
 
   submit(form) {
-  	this.me.$save();
+    var self = this;
+  	this.me.$save()
+      .then(() => {
+        self.alerts.push({type: 'success', msg: 'Успешно сохранено'});
+      })
+      .catch(err => {
+        console.error(err);
+        self.alerts.push({type: 'danger', msg: err.message || 'Произошла ошибка при сохранении'});
+      });
+  }
+
+  closeAlert(index) {
+    this.alerts.splice(index, 1);
   }
 
 }

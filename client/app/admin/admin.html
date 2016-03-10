@@ -17,7 +17,11 @@
       <li ng-repeat="user in admin.users" ng-if="!user.removed" class="list-group-item">
         <div class="row">
           <div class="col-sm-5">
-            {{user.name}}
+            <p>
+              <a ng-show="user.dromId" href="http://forums.drom.ru/member.php?u={{user.dromId}}" target="_blank">{{user.name}}</a>
+              <a ng-show="!user.dromId">{{user.name}}</a>
+            </p>
+            <p ng-if="user.provider === 'invite'"><small>Код для приглащения: {{user.invite.code}}</small></p>
           </div>
           <div class="col-sm-5">
             <p>{{user.car.mark}} {{user.car.model}}</p>
@@ -26,7 +30,7 @@
           <div class="col-sm-2 text-right">
             <div class="btn-group" role="group" aria-label="...">
               <a class="btn btn-primary" ng-click="admin.getForm(user, $index)" href><span class="glyphicon glyphicon-edit"></span></a>
-              <a class="btn btn-primary" ng-click="admin.sendInvite(user)" href><span class="glyphicon glyphicon-envelope"></span></a>
+              <a class="btn btn-primary" ng-click="admin.sendInvite(user)" href ng-show="user.dromId"><span class="glyphicon glyphicon-envelope"></span></a>
               <a class="btn btn-primary" ng-click="admin.delete(user)" href><span class="glyphicon glyphicon-trash"></span></a>
             </div>
           </div>

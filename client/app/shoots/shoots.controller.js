@@ -30,7 +30,7 @@ class ShootsController {
 			this.filter  = {
 	  		limit: 100, 
 	  		offset: 0,
-	  		me: true
+	  		my: true
 	  	};
 		} else {
 			this.filter  = {

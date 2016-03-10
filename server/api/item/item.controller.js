@@ -69,6 +69,7 @@ export function index(req, res) {
       my     = req.query.my,
       where  = {};
 
+  console.log(req.query);
   if(req.query.sd && req.query.ed){
     where.dtime = {
       $gte: new Date(req.query.sd),
@@ -98,6 +99,8 @@ export function index(req, res) {
       {'victim.id': req.user._id}
     ];
   }
+
+  console.log(where);
 
   Item.find()
     .where(where)

@@ -3,7 +3,7 @@
 (function() {
 
 class AdminController {
-  constructor(UserService, User, Modal, Item) {
+  constructor(UserService, User, Modal, Item, socket, $scope) {
     // Use the User $resource to fetch all users
     this.users   = UserService.query();
     this.confirm = Modal.confirm;
