@@ -28,6 +28,10 @@ function saveUpdates(user, updates) {
       updates.role = entity.role;
     }
 
+    if(updates.provider === 'invite'){
+      updates.provider === 'local';
+    }
+
     var updated = _.merge(entity, updates);
     updated.invite = {};
 
