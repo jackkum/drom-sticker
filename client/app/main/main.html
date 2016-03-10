@@ -3,38 +3,98 @@
     <div class="col-lg-12">
       <h1 class="page-header">Привет {{main.me.name}}</h1>
 
-      <table class="table">
-      	<tbody>
-      		<tr>
-      			<td>Email</td>
-      			<td>{{main.me.email}}</td>
-      		</tr>
-      		<tr>
-      			<td>Авто</td>
-      			<td>{{main.me.car.model}} {{main.me.car.mark}}</td>
-      		</tr>
-      		<tr>
-      			<td>Цвет</td>
-      			<td>{{main.me.car.color}}</td>
-      		</tr>
-      		<tr>
-      			<td>Номер</td>
-      			<td>{{main.me.car.number}}</td>
-      		</tr>
-      	</tbody>
-      </table>
+      <form class="form" name="form" ng-submit="main.submit(form)" novalidate>
       
-      <form class="form" name="form" ng-submit="main.changePassword(form)" novalidate>
-      	<div class="form-group">
-	  			<label>Сменить пароль</label>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" 
+              name="email" 
+              class="form-control" 
+              ng-model="main.me.email" 
+              placeholder="Email"
+              required />
+        </div>
 
-	  			<div class="input-group">
-						<input type="password" class="form-control" ng-model="main.me.password" placeholder="Пароль" required>
-						<span class="input-group-btn">
-							<button class="btn btn-primary" type="submit" ng-disabled="form.$invalid">Сохранить</button>
-						</span>
-					</div>
-				</div>
+        <div class="form-group">
+          <label>Пароль</label>
+          <input type="password" 
+              name="password" 
+              class="form-control" 
+              ng-model="main.me.password" 
+              placeholder="Пароль" />
+        </div>
+
+        <div class="form-group">
+          <label>Автомобиль</label>
+
+          <div class="row">
+            <div class="col-sm-3">
+              <input type="text" 
+                name="carMark" 
+                class="form-control" 
+                ng-model="main.me.car.mark" 
+                placeholder="Марка"
+                required />
+            </div>
+            <div class="col-sm-3">
+              <input type="text" 
+                name="carModel" 
+                class="form-control" 
+                ng-model="main.me.car.model" 
+                placeholder="Модель"
+                required />
+            </div>
+            <div class="col-sm-3">
+              <input type="text" 
+                name="carColor" 
+                class="form-control" 
+                ng-model="main.me.car.color" 
+                placeholder="Цвет"
+                required />
+            </div>
+            <div class="col-sm-3">
+              <input type="text" 
+                name="carNumber" 
+                class="form-control" 
+                ng-model="main.me.car.number" 
+                placeholder="Номер"
+                required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Контакты</label>
+
+            <div class="row">
+              <div class="col-sm-4">
+                <input type="text" 
+                  name="phone" 
+                  class="form-control" 
+                  ng-model="main.me.contacts.phone" 
+                  placeholder="Телефон" />
+              </div>
+              <div class="col-sm-4">
+                <input type="text" 
+                  name="skype" 
+                  class="form-control" 
+                  ng-model="main.me.contacts.skype" 
+                  placeholder="Skype" />
+              </div>
+              <div class="col-sm-4">
+                <input type="text" 
+                  name="icq" 
+                  class="form-control" 
+                  ng-model="main.me.contacts.icq" 
+                  placeholder="ICQ" />
+              </div>
+              
+            </div>
+          </div>
+
+          <div class="text-right">
+            <button class="btn btn-default" type="submit" ng-disabled="form.$invalid">Сохранить</button>
+          </div>
+
       </form>
     </div>
   </div>

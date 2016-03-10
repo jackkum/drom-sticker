@@ -3,27 +3,55 @@
 (function() {
 
 class InviteController {
-	constructor(User, $route, $location) {
-	  var hash = $route.current.params.hash,
-	  		self = this;
+	constructor(Auth, User, $route, $location, appConfig) {
+	  var code = $route.current.params.code;
 
-	  if( ! hash){
-	  	return $location.path('/');
-	  }
+	  this.captchaResponse = '';
+		this.captchaWidgetId = null;
+		
+		this.code       = code ? parseInt(code, 10) : undefined;
+	  this.Auth       = Auth;
+	  this.User       = User;
+	  this.location   = $location;
+	  this.captchaKey = appConfig.recaptchaSite;
+	}
 
-	  User.invite({id: hash})
+	setWidgetId(widgetId) {
+		this.captchaWidgetId = widgetId;
+	}
+
+	setResponse(response) {
+			this.captchaResponse = response;
+	}
+
+	load(form) {
+
+		if( ! form.$valid){
+			return;
+		}
+
+		// hide invite form
+		this.inviteForm = false;
+		// get self instance
+		var self = this;
+
+		// load user by hash
+		this.User.code({code: this.code, captcha: this.captchaResponse})
 	  	.$promise
 	  	.then(user => {
 	  		if( ! user){
-	  			console.error("User not found by hash: " + hash);
-	  			return $location.path('/');
+	  			return console.error("User not found by hash: " + self.code);
 	  		}
 
+	  		self.inviteForm = true;
 	  		self.user = user;
+	  		self.Auth.putToken(user.invite.token);
+				self.Auth.reload();
+
+				self.location.path('/');
 	  	})
 	  	.catch(err => {
-	  		console.error(err);
-	  		return $location.path('/');
+	  		return console.error(err);
 	  	});
 	}
 }

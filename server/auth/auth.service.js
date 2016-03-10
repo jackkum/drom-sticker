@@ -3,6 +3,7 @@
 import passport from 'passport';
 import config from '../config/environment';
 import jwt from 'jsonwebtoken';
+import request from 'request';
 import expressJwt from 'express-jwt';
 import compose from 'composable-middleware';
 import User from '../api/user/user.model';
@@ -49,9 +50,13 @@ export function isAuthenticated() {
 /**
  * Checks if the user role meets the minimum requirements of the route
  */
-export function hasRole(roleRequired) {
+export function hasRole(roleRequired, noCompose) {
   if (!roleRequired) {
     throw new Error('Required role needs to be set');
+  }
+
+  if(noCompose){
+    return config.userRoles.indexOf(req.user.role) >= config.userRoles.indexOf(roleRequired);
   }
 
   return compose()
@@ -70,7 +75,7 @@ export function hasRoleAdminOrAmI() {
   
   return compose()
     .use(isAuthenticated())
-    .use(function meetsRequirements(req, res, next) {
+    .use(function meetsRequirementsOrAmI(req, res, next) {
       if (config.userRoles.indexOf(req.user.role) >=
           config.userRoles.indexOf('admin') || 
           req.user._id.equals(req.body._id)) {
@@ -100,4 +105,36 @@ export function setTokenCookie(req, res) {
   var token = signToken(req.user._id, req.user.role);
   res.cookie('token', token);
   res.redirect('/');
+}
+
+export function verifiReCaptcha(response, ip) {
+  return new Promise((resolve, reject) => {
+    request.post(
+      {
+        url: 'https://www.google.com/recaptcha/api/siteverify',
+        form: {
+          secret: config.recaptchaSecret,
+          response: response,
+          remoteip: ip
+        }
+      }, (err, httpResponse, body) => {
+        if (err) {
+          return reject(err);
+        }
+
+        try {
+          var result = JSON.parse(body);
+
+          if( ! result || ! result.success){
+            return reject(new Error("Не удалось пройти проверку"));
+          }
+
+          return resolve(result);
+
+        } catch (e) {
+          return reject(new Error("Не удалось пройти проверку"));
+        }
+      }
+    );
+  });
 }

@@ -23,8 +23,7 @@ class AdminController {
   		'Подтвердить удаление', 
   		'<p>Удалить пользователя <strong>' + user.name + '</strong> ?</p>'
   	).result.then(() => {
-  		user.removed = true;
-			user.$save();
+			user.$remove();
   	});
   }
 
@@ -63,7 +62,7 @@ class AdminController {
       provider: 'invite'
     });
 
-    this.form({
+    var modal = this.form({
       modal: {dismissable: true},
       user: user,
       submit: (form) => {
@@ -73,6 +72,10 @@ class AdminController {
         }
       }
     }, 'modal-default', 'components/forms/invite.form.html');
+  }
+
+  sendInvite(user) {
+    this.User.invite(user);
   }
 }
 

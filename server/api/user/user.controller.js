@@ -5,6 +5,8 @@ import User from './user.model';
 import passport from 'passport';
 import config from '../../config/environment';
 import jwt from 'jsonwebtoken';
+import * as drom from '../../drom/drom.service';
+import * as auth from '../../auth/auth.service';
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
@@ -18,9 +20,17 @@ function respondWithResult(res, statusCode) {
   };
 }
 
-function saveUpdates(updates) {
+function saveUpdates(user, updates) {
   return function(entity) {
+
+    // only admin can change the role
+    if( ! auth.hasRole('admin', true)){
+      updates.role = entity.role;
+    }
+
     var updated = _.merge(entity, updates);
+    updated.invite = {};
+
     return updated.saveAsync()
       .spread(updated => {
         return updated;
@@ -68,7 +78,7 @@ function handleError(res, statusCode) {
  * restriction: 'admin'
  */
 export function index(req, res) {
-  User.findAsync({}, '-salt -password')
+  User.findAsync({}, '-salt -password -invite')
     .then(users => {
       res.status(200).json(users);
     })
@@ -80,14 +90,17 @@ export function index(req, res) {
  */
 export function create(req, res, next) {
   var newUser = new User(req.body);
-  newUser.provider = 'local';
-  newUser.role = 'user';
   newUser.saveAsync()
     .spread(function(user) {
-      var token = jwt.sign({ _id: user._id }, config.secrets.session, {
-        expiresIn: 60 * 60 * 5
-      });
-      res.json({ token });
+      //var token = jwt.sign({ _id: user._id }, config.secrets.session, {
+      //  expiresIn: 60 * 60 * 5
+      //});
+
+      delete newUser.salt;
+      delete newUser.password;
+      delete newUser.invite;
+
+      res.json({newUser});
     })
     .catch(validationError(res));
 }
@@ -98,7 +111,7 @@ export function create(req, res, next) {
 export function show(req, res, next) {
   var userId = req.params.id;
 
-  User.findByIdAsync(userId, '-salt -password')
+  User.findByIdAsync(userId, '-salt -password -invite')
     .then(user => {
       if (!user) {
         return res.status(404).end();
@@ -156,20 +169,67 @@ export function update(req, res) {
 
   User.findByIdAsync(userId)
     .then(handleEntityNotFound(res))
-    .then(saveUpdates(req.body))
+    .then(saveUpdates(req.user, req.body))
     .then(respondWithResult(res))
     .catch(handleError(res));
 }
 
-export function invite(req, res, next) {
-  var hash = req.params.id;
+export function code(req, res, next) {
+  var code  = req.body.code,
+    captcha = req.body.captcha;
 
-  User.findOneAsync({ hash: hash }, '-salt -password -hash')
+  auth.verifiReCaptcha(captcha, req.connection.remoteAddress)
+    .then(result => {
+      return User.findOneAsync({'invite.code': code}, '-salt -password');
+    })
     .then(user => { // don't ever give out the password or salt
       if (!user) {
-        return res.status(401).end();
+        return res.status(404).end();
       }
+
+      user.invite = user.invite || {};
+      user.invite.token = auth.signToken(user._id, user.role);
+
       res.json(user);
+    })
+    .catch(err => next(err));
+}
+
+export function invite(req, res, next) {
+  var id = req.params.id;
+  User.findOneAsync({ _id: id })
+    .then(user => {
+      if (!user) {
+        return res.status(404).end();
+      }
+
+      if( ! user.dromId){
+        return res.status(500).end();
+      }
+
+      if( ! user.invite.code){
+        user.invite.code = user.makeHash();
+        return user.save()
+          .then(err => {
+            if(err){
+              throw err;
+            }
+
+            return user;
+          });
+      }
+      
+      return user;
+    })
+    .then(user => {
+      return drom.sendMessage(
+        user.dromId, 
+        "Приглашение в игру \"Выстрел в стикер\"", 
+        "[URL=\"https://drom-sticker.herokuapp.com/invite?code=" + user.invite.code + "\"]Вступить в ряды[/URL]\n\n[URL=\"http://forums.drom.ru/irkutsk/t" + config.drom.theme + ".html\"]Подробнее тут[/URL]"
+      )
+      .then(nikname => {
+        res.json({nikname: nikname});
+      });
     })
     .catch(err => next(err));
 }
@@ -180,7 +240,7 @@ export function invite(req, res, next) {
 export function me(req, res, next) {
   var userId = req.user._id;
 
-  User.findOneAsync({ _id: userId }, '-salt -password -hash')
+  User.findOneAsync({ _id: userId }, '-salt -password -invite')
     .then(user => { // don't ever give out the password or salt
       if (!user) {
         return res.status(401).end();

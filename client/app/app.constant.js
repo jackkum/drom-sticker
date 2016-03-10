@@ -3,7 +3,7 @@
 
 angular.module('stikerApp.constants', [])
 
-.constant('appConfig', {userRoles:['guest','user','admin']})
+.constant('appConfig', {userRoles:['guest','user','admin'],recaptchaSite:'6LdVaRoTAAAAAN3qYWygxZnBc5CyR4aQ0gvbrJKD'})
 
 ;
 })(angular);

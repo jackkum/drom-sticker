@@ -288,7 +288,7 @@ export function sendMessage(dromId, title, message) {
 						}
 
 						console.log("Message sent");
-						return resolve();
+						return resolve(nikname);
 					});
 				});
 			});
