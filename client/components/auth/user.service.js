@@ -10,8 +10,14 @@ function UserResource(Resource) {
         id: 'me'
       }
     },
+    code: {
+      method: 'POST',
+      params: {
+        controller: 'code'
+      }
+    },
     invite: {
-      method: 'GET',
+      method: 'PUT',
       params: {
       	controller: 'invite'
       }

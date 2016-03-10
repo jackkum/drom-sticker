@@ -177,6 +177,14 @@ function AuthService($location, $http, $cookies, $q, appConfig, Util, User) {
      */
     getToken() {
       return $cookies.get('token');
+    },
+
+    putToken(token) {
+      $cookies.put('token', token);
+    },
+
+    reload() {
+      currentUser = User.get();
     }
   };
 

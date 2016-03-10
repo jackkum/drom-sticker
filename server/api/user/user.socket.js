@@ -26,7 +26,7 @@ function createListener(event, socket) {
 
     delete doc.salt;
     delete doc.password;
-    delete doc.hash;
+    delete doc.invite;
 
     socket.emit(event, doc);
   };

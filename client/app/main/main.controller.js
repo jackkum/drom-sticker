@@ -33,7 +33,7 @@ class MainController {
     }
   }
 
-  changePassword(form) {
+  submit(form) {
   	this.me.$save();
   }
 

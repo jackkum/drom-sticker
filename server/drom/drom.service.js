@@ -232,20 +232,13 @@ export function insertPost(theme, post) {
 	});
 }
 
-export function sendMessage(userId, title, message) {  
+export function sendMessage(dromId, title, message) {  
 
-	return User.findByIdAsync(userId)
-		.then(user => {
-			if( ! user){
-				throw new Error('User not found');
-			}
-
-			return login();
-		})
-		.then(user => {
+	return login()
+		.then(() => {
 			return new Promise((resolve, reject) => {
 				req.get({
-					url: 'http://forums.drom.ru/private.php?do=newpm&u=' + user.dromId,
+					url: 'http://forums.drom.ru/private.php?do=newpm&u=' + dromId,
 					headers: {
 						'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
 					}
@@ -262,13 +255,21 @@ export function sendMessage(userId, title, message) {
 
 					var token = match[1];
 
+					match = body.match(/\<textarea class=\"primary full textbox popupctrl\" id=\"pmrecips_ctrl\" name=\"recipients\" rows=\"1\" cols=\"50\"  tabindex=\"1\"\>([^<]*)\<\/textarea\>/);
+
+					if( ! match){
+						return reject(new Error('No security token found'));
+					}
+
+					var nikname = match[1];
+
 					req.post({
 						url: 'http://forums.drom.ru/private.php?do=insertpm&pmid=',
 						headers: {
 							'user-agent': 'Mozilla/5.0 (X11; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0'
 						},
 						form: {
-							recipients: user.name,
+							recipients: nikname,
 							bccrecipients:"",
 							title: title,
 							message_backup: message,
@@ -287,7 +288,7 @@ export function sendMessage(userId, title, message) {
 						}
 
 						console.log("Message sent");
-						return resolve();
+						return resolve(nikname);
 					});
 				});
 			});

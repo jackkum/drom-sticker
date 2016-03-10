@@ -13,7 +13,8 @@ angular.module('stikerApp', [
   'btford.socket-io',
   'ui.bootstrap',
   'validation.match',
-  'ngFileUpload'
+  'ngFileUpload',
+  'vcRecaptcha'
 ])
   .config(function($routeProvider, $locationProvider) {
     $routeProvider

@@ -3,6 +3,8 @@
 import crypto from 'crypto';
 var mongoose = require('bluebird').promisifyAll(require('mongoose'));
 import {Schema} from 'mongoose';
+import * as drom from '../../drom/drom.service';
+import config from '../../config/environment';
 
 var UserSchema = new Schema({
   name: String,
@@ -16,7 +18,11 @@ var UserSchema = new Schema({
   },
   password: String,
   provider: String,
-  hash: String,
+  invite: {
+    code: Number,
+    token: String,
+    userId: {type: Schema.Types.ObjectId, ref: 'User'}
+  },
   salt: String,
   car: {
     mark: String, 
@@ -29,7 +35,7 @@ var UserSchema = new Schema({
     coords: {lat: Number, lon: Number}
   }],
   avatart: String,
-  dromId: Number,
+  dromId: {type: Number, unique: true},
   contacts: {
     phone: String,
     skype: String,
@@ -37,18 +43,13 @@ var UserSchema = new Schema({
   },
 
   removed: Boolean
-});
-
-UserSchema.pre('save', function(next){
-  if(this.provider === 'invite' && ! this.hash){
-    this.hash = encryptPassword(password);
+}, {
+  toObject: {
+    virtuals: true
   }
-
-  if(this.provider === 'invite' && ! this.password){
-    this.password = '' + Math.random();
+  ,toJSON: {
+    virtuals: true
   }
-
-  next();
 });
 
 /**
@@ -129,29 +130,59 @@ var validatePresenceOf = function(value) {
  */
 UserSchema
   .pre('save', function(next) {
-    // Handle new/update passwords
-    if (!this.isModified('password')) {
-      return next();
+
+    this.invite = this.invite || {};
+
+    if(this.provider === 'invite' && ! this.password){
+      this.password = '' + Math.random();
     }
 
-    if (!validatePresenceOf(this.password)) {
-      next(new Error('Invalid password'));
-    }
-
-    // Make salt with a callback
-    this.makeSalt((saltErr, salt) => {
-      if (saltErr) {
-        next(saltErr);
-      }
-      this.salt = salt;
-      this.encryptPassword(this.password, (encryptErr, hashedPassword) => {
-        if (encryptErr) {
-          next(encryptErr);
+    var self = this;
+    drom.login()
+      .then(() => {
+        if(self.provider === 'invite' && self.isNew && self.dromId){
+          self.invite.code = self.makeHash();
+          return drom.sendMessage(
+            this.dromId, 
+            "Приглашение в игру \"Выстрел в стикер\"", 
+            "[URL=\"https://drom-sticker.herokuapp.com/invite?code=" + self.invite.code + "\"]Вступить в ряды[/URL]\n\n[URL=\"http://forums.drom.ru/irkutsk/t" + config.drom.theme + ".html\"]Подробнее тут[/URL]"
+          );
         }
-        this.password = hashedPassword;
-        next();
+      })
+      .then(nikname => {
+        if(nikname){
+          self.name = nikname;
+        }
+      })
+      .then(() => {
+
+        // Handle new/update passwords
+        if (!self.isModified('password')) {
+          return next();
+        }
+
+        if (!validatePresenceOf(self.password)) {
+          next(new Error('Invalid password'));
+        }
+
+        // Make salt with a callback
+        self.makeSalt((saltErr, salt) => {
+          if (saltErr) {
+            next(saltErr);
+          }
+          self.salt = salt;
+          self.encryptPassword(self.password, (encryptErr, hashedPassword) => {
+            if (encryptErr) {
+              next(encryptErr);
+            }
+            self.password = hashedPassword;
+            next();
+          });
+        });
+      })
+      .catch(err => {
+        next(err);
       });
-    });
   });
 
 /**
@@ -217,6 +248,15 @@ UserSchema.methods = {
         callback(null, salt.toString('base64'));
       }
     });
+  },
+
+  makeHash(length) {
+    length  = length || 8;
+    var min = parseInt(new Array(length + 1).join('9'), 10), 
+      max = parseInt('1' + new Array(length).join('0'), 10),
+      pad = new Array(length + 1).join('0'),
+      str = "" + (Math.floor(Math.random() * (max - min + 1)) + min);
+    return pad.substring(0, pad.length - str.length) + str;
   },
 
   /**
