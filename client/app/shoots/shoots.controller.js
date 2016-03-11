@@ -22,23 +22,23 @@ class ShootsController {
 	  this.load();
 	}
 
-	triggerParticipation() {
-		this.participation = !this.participation;
+	triggerParticipation(participation) {
+		this.participation = participation;
 		this.items.length  = 0;
 		
 		if(this.participation){
-			this.filter  = {
-	  		limit: 100, 
-	  		offset: 0,
-	  		my: true
-	  	};
+			this.filter.offset = 0;
+			this.filter.my = true;
 		} else {
-			this.filter  = {
-	  		limit: 20, 
-	  		offset: 0
-	  	};
+			this.filter.offset = 0;
+			this.filter.my = undefined;
 		}
 
+		this.load();
+	}
+
+	nextPage() {
+		this.filter.offset += this.filter.limit;
 		this.load();
 	}
 
@@ -47,6 +47,7 @@ class ShootsController {
 		this.Item.query(self.filter)
 			.$promise
 			.then(items => {
+				self.loadMore = items.length === self.filter.limit;
 				items.forEach(item => {
 					self.items.push(item);
 				});
